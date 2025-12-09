@@ -243,27 +243,27 @@
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 25px;
+            gap: 20px;
             margin-bottom: 30px;
         }
 
         .chart-card {
             background: #1e293b;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         .chart-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 250px;
         }
 
         footer {
@@ -838,7 +838,6 @@
             data.forEach(row => {
                 const type = row.Customer_Type || 'Unknown';
                 if (!typeRevenue[type]) typeRevenue[type] = 0;
-                // Sum revenue only from selected months
                 selectedMonths.forEach(month => {
                     const val = parseFloat(String(row[month]).replace(/,/g, ''));
                     typeRevenue[type] += isNaN(val) ? 0 : val;
@@ -858,8 +857,8 @@
                         label: 'Revenue',
                         data: sorted.map(([, revenue]) => revenue),
                         backgroundColor: '#ec4899',
-                        barThickness: 40,
-                        maxBarThickness: 50
+                        categoryPercentage: 0.7,
+                        barPercentage: 0.8
                     }]
                 },
                 options: {
@@ -873,16 +872,12 @@
                             }
                         }
                     },
-                    layout: {
-                        padding: {
-                            bottom: 10
-                        }
-                    },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
                                 color: '#94a3b8',
+                                font: { size: 10 },
                                 callback: (value) => '₹' + (value / 100000).toFixed(1) + 'L'
                             },
                             grid: { color: '#334155' }
@@ -893,10 +888,10 @@
                                 maxRotation: 0,
                                 minRotation: 0,
                                 autoSkip: false,
-                                font: { size: 10 },
-                                padding: 5
+                                font: { size: 9 }
                             },
-                            grid: { display: false }
+                            grid: { display: false },
+                            offset: true
                         }
                     }
                 }
