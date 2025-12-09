@@ -243,7 +243,7 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="partyGroupFilter">Party Group</label>
+                    <label for="partyGroupFilter">Group Description</label>
                     <select id="partyGroupFilter" onchange="applyFilters()">
                         <option value="All">All Groups</option>
                     </select>
@@ -366,13 +366,20 @@
         }
 
         function populateFilters() {
-            const branches = ['All', ...new Set(rawData.map(d => d.Branch).filter(Boolean))];
+            // Filter out Subtotal and Grand Total from branches
+            const branches = ['All', ...new Set(rawData
+                .map(d => d.Branch)
+                .filter(b => b && !b.includes('SUBTOTAL') && !b.includes('GRAND TOTAL'))
+            )];
+            
             const customerTypes = ['All', ...new Set(rawData.map(d => d.Customer_Type).filter(Boolean))];
-            const partyGroups = ['All', ...new Set(rawData.map(d => d.Party_Group).filter(Boolean))];
+            
+            // Use Group_Description instead of Party_Group
+            const groupDescriptions = ['All', ...new Set(rawData.map(d => d.Group_Description).filter(Boolean))];
 
             populateSelect('branchFilter', branches);
             populateSelect('customerTypeFilter', customerTypes);
-            populateSelect('partyGroupFilter', partyGroups);
+            populateSelect('partyGroupFilter', groupDescriptions);
         }
 
         function populateSelect(id, options) {
@@ -387,12 +394,17 @@
         function getFilteredData() {
             const branch = document.getElementById('branchFilter').value;
             const customerType = document.getElementById('customerTypeFilter').value;
-            const partyGroup = document.getElementById('partyGroupFilter').value;
+            const groupDesc = document.getElementById('partyGroupFilter').value;
 
             return rawData.filter(row => {
+                // Filter out rows with SUBTOTAL or GRAND TOTAL in Branch
+                if (row.Branch && (row.Branch.includes('SUBTOTAL') || row.Branch.includes('GRAND TOTAL'))) {
+                    return false;
+                }
+                
                 if (branch !== 'All' && row.Branch !== branch) return false;
                 if (customerType !== 'All' && row.Customer_Type !== customerType) return false;
-                if (partyGroup !== 'All' && row.Party_Group !== partyGroup) return false;
+                if (groupDesc !== 'All' && row.Group_Description !== groupDesc) return false;
                 return true;
             });
         }
