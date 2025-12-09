@@ -86,45 +86,97 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .month-filter {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .multi-select-container {
+            position: relative;
         }
 
-        .month-checkbox {
-            display: flex;
-            align-items: center;
+        .multi-select-display {
+            padding: 10px 15px;
             background: #0f172a;
-            padding: 8px 12px;
-            border-radius: 6px;
             border: 2px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .month-checkbox:hover {
+        .multi-select-display:hover {
             border-color: #3b82f6;
+        }
+
+        .multi-select-display.open {
+            border-color: #3b82f6;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .multi-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            border: 2px solid #3b82f6;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .multi-select-dropdown.open {
+            display: block;
+        }
+
+        .multi-select-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .multi-select-option:hover {
             background: #1e293b;
         }
 
-        .month-checkbox input[type="checkbox"] {
-            margin-right: 8px;
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
+        .multi-select-option.select-all {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
+            color: #3b82f6;
         }
 
-        .month-checkbox label {
+        .multi-select-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
+        }
+
+        .multi-select-option label {
+            cursor: pointer;
+            flex: 1;
             margin: 0;
             color: #cbd5e1;
-            font-size: 0.9rem;
         }
 
-        .month-checkbox input[type="checkbox"]:checked + label {
+        .multi-select-option input[type="checkbox"]:checked + label {
             color: #3b82f6;
-            font-weight: 600;
+            font-weight: 500;
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.3s;
+        }
+
+        .dropdown-arrow.open {
+            transform: rotate(180deg);
         }
 
         .kpi-grid {
@@ -289,43 +341,50 @@
                         <option value="All">All Groups</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="filters">
-                <div class="filter-group" style="grid-column: 1 / -1;">
-                    <label>Select Months (All selected by default)</label>
-                    <div class="month-filter" id="monthFilter">
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Apr-25" value="Apr-25" checked onchange="applyFilters()">
-                            <label for="month-Apr-25">Apr-25</label>
+                <div class="filter-group">
+                    <label>Select Months</label>
+                    <div class="multi-select-container">
+                        <div class="multi-select-display" id="monthDisplay" onclick="toggleMonthDropdown()">
+                            <span id="monthDisplayText">All Months Selected (8)</span>
+                            <span class="dropdown-arrow" id="monthArrow">▼</span>
                         </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-May-25" value="May-25" checked onchange="applyFilters()">
-                            <label for="month-May-25">May-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Jun-25" value="Jun-25" checked onchange="applyFilters()">
-                            <label for="month-Jun-25">Jun-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Jul-25" value="Jul-25" checked onchange="applyFilters()">
-                            <label for="month-Jul-25">Jul-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Aug-25" value="Aug-25" checked onchange="applyFilters()">
-                            <label for="month-Aug-25">Aug-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Sep-25" value="Sep-25" checked onchange="applyFilters()">
-                            <label for="month-Sep-25">Sep-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Oct-25" value="Oct-25" checked onchange="applyFilters()">
-                            <label for="month-Oct-25">Oct-25</label>
-                        </div>
-                        <div class="month-checkbox">
-                            <input type="checkbox" id="month-Nov-25" value="Nov-25" checked onchange="applyFilters()">
-                            <label for="month-Nov-25">Nov-25</label>
+                        <div class="multi-select-dropdown" id="monthDropdown">
+                            <div class="multi-select-option select-all">
+                                <input type="checkbox" id="selectAllMonths" checked onchange="toggleAllMonths()">
+                                <label for="selectAllMonths">Select All</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Apr-25" value="Apr-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Apr-25">April 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-May-25" value="May-25" checked onchange="updateMonthSelection()">
+                                <label for="month-May-25">May 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Jun-25" value="Jun-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Jun-25">June 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Jul-25" value="Jul-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Jul-25">July 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Aug-25" value="Aug-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Aug-25">August 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Sep-25" value="Sep-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Sep-25">September 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Oct-25" value="Oct-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Oct-25">October 2025</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="month-Nov-25" value="Nov-25" checked onchange="updateMonthSelection()">
+                                <label for="month-Nov-25">November 2025</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -495,6 +554,67 @@
             return months.filter(month => document.getElementById(`month-${month}`).checked);
         }
 
+        function toggleMonthDropdown() {
+            const dropdown = document.getElementById('monthDropdown');
+            const display = document.getElementById('monthDisplay');
+            const arrow = document.getElementById('monthArrow');
+            
+            dropdown.classList.toggle('open');
+            display.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        function toggleAllMonths() {
+            const selectAll = document.getElementById('selectAllMonths');
+            const months = ['Apr-25', 'May-25', 'Jun-25', 'Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25'];
+            
+            months.forEach(month => {
+                document.getElementById(`month-${month}`).checked = selectAll.checked;
+            });
+            
+            updateMonthDisplayText();
+            applyFilters();
+        }
+
+        function updateMonthSelection() {
+            const months = ['Apr-25', 'May-25', 'Jun-25', 'Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25'];
+            const allChecked = months.every(month => document.getElementById(`month-${month}`).checked);
+            
+            document.getElementById('selectAllMonths').checked = allChecked;
+            updateMonthDisplayText();
+            applyFilters();
+        }
+
+        function updateMonthDisplayText() {
+            const selectedMonths = getSelectedMonths();
+            const displayText = document.getElementById('monthDisplayText');
+            
+            if (selectedMonths.length === 0) {
+                displayText.textContent = 'No Months Selected';
+                displayText.style.color = '#ef4444';
+            } else if (selectedMonths.length === 8) {
+                displayText.textContent = 'All Months Selected (8)';
+                displayText.style.color = '#e2e8f0';
+            } else {
+                displayText.textContent = `${selectedMonths.length} Month${selectedMonths.length > 1 ? 's' : ''} Selected`;
+                displayText.style.color = '#3b82f6';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.querySelector('.multi-select-container');
+            if (container && !container.contains(event.target)) {
+                const dropdown = document.getElementById('monthDropdown');
+                const display = document.getElementById('monthDisplay');
+                const arrow = document.getElementById('monthArrow');
+                
+                if (dropdown) dropdown.classList.remove('open');
+                if (display) display.classList.remove('open');
+                if (arrow) arrow.classList.remove('open');
+            }
+        });
+
         function updateDashboard() {
             const data = getFilteredData();
             updateKPIs(data);
@@ -586,13 +706,18 @@
         }
 
         function updateCustomersChart(data) {
+            const selectedMonths = getSelectedMonths();
             const customerRevenue = {};
+            
             data.forEach(row => {
                 const name = row.Party_name;
                 if (name) {
                     if (!customerRevenue[name]) customerRevenue[name] = 0;
-                    const val = parseFloat(String(row.Total_Revenue).replace(/,/g, ''));
-                    customerRevenue[name] += isNaN(val) ? 0 : val;
+                    // Sum revenue only from selected months
+                    selectedMonths.forEach(month => {
+                        const val = parseFloat(String(row[month]).replace(/,/g, ''));
+                        customerRevenue[name] += isNaN(val) ? 0 : val;
+                    });
                 }
             });
 
@@ -644,12 +769,17 @@
         }
 
         function updateBranchChart(data) {
+            const selectedMonths = getSelectedMonths();
             const branchRevenue = {};
+            
             data.forEach(row => {
                 const branch = row.Branch || 'Unknown';
                 if (!branchRevenue[branch]) branchRevenue[branch] = 0;
-                const val = parseFloat(String(row.Total_Revenue).replace(/,/g, ''));
-                branchRevenue[branch] += isNaN(val) ? 0 : val;
+                // Sum revenue only from selected months
+                selectedMonths.forEach(month => {
+                    const val = parseFloat(String(row[month]).replace(/,/g, ''));
+                    branchRevenue[branch] += isNaN(val) ? 0 : val;
+                });
             });
 
             const sorted = Object.entries(branchRevenue).sort((a, b) => b[1] - a[1]);
@@ -693,12 +823,17 @@
         }
 
         function updateCustomerTypeChart(data) {
+            const selectedMonths = getSelectedMonths();
             const typeRevenue = {};
+            
             data.forEach(row => {
                 const type = row.Customer_Type || 'Unknown';
                 if (!typeRevenue[type]) typeRevenue[type] = 0;
-                const val = parseFloat(String(row.Total_Revenue).replace(/,/g, ''));
-                typeRevenue[type] += isNaN(val) ? 0 : val;
+                // Sum revenue only from selected months
+                selectedMonths.forEach(month => {
+                    const val = parseFloat(String(row[month]).replace(/,/g, ''));
+                    typeRevenue[type] += isNaN(val) ? 0 : val;
+                });
             });
 
             const sorted = Object.entries(typeRevenue).sort((a, b) => b[1] - a[1]);
