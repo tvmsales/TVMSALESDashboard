@@ -283,7 +283,7 @@
 
         .chart-container {
             position: relative;
-            height: 220px;
+            height: 280px;
         }
 
         footer {
@@ -354,19 +354,22 @@
             <div class="filters">
                 <div class="filter-group">
                     <label for="branchFilter">Branch</label>
-                    <select id="branchFilter" onchange="applyFilters()">
+                    <input type="text" id="branchSearch" class="search-input" placeholder="Search branch..." onkeyup="filterDropdown('branchFilter', 'branchSearch')">
+                    <select id="branchFilter" size="5" onchange="applyFilters()" style="width: 100%; max-height: 150px; overflow-y: auto;">
                         <option value="All">All Branches</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="customerTypeFilter">Customer Type</label>
-                    <select id="customerTypeFilter" onchange="applyFilters()">
+                    <input type="text" id="customerTypeSearch" class="search-input" placeholder="Search type..." onkeyup="filterDropdown('customerTypeFilter', 'customerTypeSearch')">
+                    <select id="customerTypeFilter" size="5" onchange="applyFilters()" style="width: 100%; max-height: 150px; overflow-y: auto;">
                         <option value="All">All Types</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="partyGroupFilter">Group Description</label>
-                    <select id="partyGroupFilter" onchange="applyFilters()">
+                    <input type="text" id="partyGroupSearch" class="search-input" placeholder="Search group..." onkeyup="filterDropdown('partyGroupFilter', 'partyGroupSearch')">
+                    <select id="partyGroupFilter" size="5" onchange="applyFilters()" style="width: 100%; max-height: 150px; overflow-y: auto;">
                         <option value="All">All Groups</option>
                     </select>
                 </div>
@@ -535,20 +538,36 @@
         }
 
         function populateFilters() {
-            // Filter out Subtotal and Grand Total from branches
+            // Filter out Subtotal and Grand Total from branches and sort alphabetically
             const branches = ['All', ...new Set(rawData
                 .map(d => d.Branch)
                 .filter(b => b && !b.includes('SUBTOTAL') && !b.includes('GRAND TOTAL'))
-            )];
+            )].sort();
             
-            const customerTypes = ['All', ...new Set(rawData.map(d => d.Customer_Type).filter(Boolean))];
+            const customerTypes = ['All', ...new Set(rawData.map(d => d.Customer_Type).filter(Boolean))].sort();
             
-            // Use Group_Description instead of Party_Group
-            const groupDescriptions = ['All', ...new Set(rawData.map(d => d.Group_Description).filter(Boolean))];
+            // Use Group_Description and sort alphabetically
+            const groupDescriptions = ['All', ...new Set(rawData.map(d => d.Group_Description).filter(Boolean))].sort();
 
             populateSelect('branchFilter', branches);
             populateSelect('customerTypeFilter', customerTypes);
             populateSelect('partyGroupFilter', groupDescriptions);
+        }
+
+        function filterDropdown(selectId, searchId) {
+            const input = document.getElementById(searchId);
+            const filter = input.value.toUpperCase();
+            const select = document.getElementById(selectId);
+            const options = select.getElementsByTagName('option');
+
+            for (let i = 0; i < options.length; i++) {
+                const txtValue = options[i].textContent || options[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
         }
 
         function populateSelect(id, options) {
@@ -760,7 +779,7 @@
             charts.customers = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: sorted.map(([name]) => name.substring(0, 25)),
+                    labels: sorted.map(([name]) => name),
                     datasets: [{
                         label: 'Revenue',
                         data: sorted.map(([, revenue]) => revenue),
@@ -775,6 +794,7 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
+                                title: (context) => context[0].label,
                                 label: (context) => formatCurrency(context.parsed.x)
                             }
                         }
@@ -784,12 +804,18 @@
                             beginAtZero: true,
                             ticks: {
                                 color: '#94a3b8',
+                                font: { size: 9 },
                                 callback: (value) => '₹' + (value / 100000).toFixed(1) + 'L'
                             },
                             grid: { color: '#334155' }
                         },
                         y: {
-                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { size: 9 },
+                                autoSkip: false,
+                                crossAlign: 'far'
+                            },
                             grid: { display: false }
                         }
                     }
