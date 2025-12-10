@@ -180,6 +180,10 @@
             color: #3b82f6;
         }
 
+        .multi-select-option.hidden {
+            display: none;
+        }
+
         .multi-select-option input[type="checkbox"] {
             margin-right: 10px;
             width: 18px;
@@ -205,6 +209,11 @@
 
         .dropdown-arrow.open {
             transform: rotate(180deg);
+        }
+
+        #groupOptions {
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .kpi-grid {
@@ -365,11 +374,25 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="partyGroupFilter">Group Description</label>
-                    <input type="text" id="partyGroupSearch" class="search-input" placeholder="Search group..." onkeyup="filterDropdown('partyGroupFilter', 'partyGroupSearch')">
-                    <select id="partyGroupFilter" size="5" onchange="applyFilters()" style="width: 100%; max-height: 150px; overflow-y: auto;">
-                        <option value="All">All Groups</option>
-                    </select>
+                    <label>Group Description</label>
+                    <div class="multi-select-container">
+                        <div class="multi-select-display" id="groupDisplay" onclick="toggleGroupDropdown()">
+                            <span id="groupDisplayText">All Groups Selected</span>
+                            <span class="dropdown-arrow" id="groupArrow">▼</span>
+                        </div>
+                        <div class="multi-select-dropdown" id="groupDropdown">
+                            <div class="multi-select-option select-all">
+                                <input type="checkbox" id="selectAllGroups" checked onchange="toggleAllGroups()">
+                                <label for="selectAllGroups">Select All</label>
+                            </div>
+                            <div style="padding: 5px 10px; border-bottom: 1px solid #334155;">
+                                <input type="text" id="groupSearch" placeholder="Search groups..." 
+                                    style="width: 100%; padding: 5px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; font-size: 0.85rem;"
+                                    onkeyup="searchGroups()">
+                            </div>
+                            <div id="groupOptions"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label>Select Months</label>
@@ -545,28 +568,97 @@
             // No sorting for Customer Type
             const customerTypes = ['All', ...new Set(rawData.map(d => d.Customer_Type).filter(Boolean))];
             
-            // ONLY Group Description is sorted alphabetically
-            const groupDescriptions = ['All', ...new Set(rawData.map(d => d.Group_Description).filter(Boolean))].sort();
+            // Group Description - sorted alphabetically
+            const groupDescriptions = [...new Set(rawData.map(d => d.Group_Description).filter(Boolean))].sort();
 
             populateSelect('branchFilter', branches);
             populateSelect('customerTypeFilter', customerTypes);
-            populateSelect('partyGroupFilter', groupDescriptions);
+            populateGroupFilter(groupDescriptions);
         }
 
-        function filterDropdown(selectId, searchId) {
-            const input = document.getElementById(searchId);
-            const filter = input.value.toUpperCase();
-            const select = document.getElementById(selectId);
-            const options = select.getElementsByTagName('option');
+        function populateGroupFilter(groups) {
+            const container = document.getElementById('groupOptions');
+            container.innerHTML = '';
+            
+            groups.forEach(group => {
+                const div = document.createElement('div');
+                div.className = 'multi-select-option group-option';
+                div.innerHTML = `
+                    <input type="checkbox" id="group-${group}" value="${group}" checked onchange="updateGroupSelection()">
+                    <label for="group-${group}">${group}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
 
-            for (let i = 0; i < options.length; i++) {
-                const txtValue = options[i].textContent || options[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    options[i].style.display = '';
-                } else {
-                    options[i].style.display = 'none';
-                }
+        function toggleGroupDropdown() {
+            const dropdown = document.getElementById('groupDropdown');
+            const display = document.getElementById('groupDisplay');
+            const arrow = document.getElementById('groupArrow');
+            
+            dropdown.classList.toggle('open');
+            display.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        function toggleAllGroups() {
+            const selectAll = document.getElementById('selectAllGroups');
+            const checkboxes = document.querySelectorAll('#groupOptions input[type="checkbox"]');
+            
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            
+            updateGroupDisplayText();
+            applyFilters();
+        }
+
+        function updateGroupSelection() {
+            const checkboxes = document.querySelectorAll('#groupOptions input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            document.getElementById('selectAllGroups').checked = allChecked;
+            updateGroupDisplayText();
+            applyFilters();
+        }
+
+        function updateGroupDisplayText() {
+            const checkboxes = document.querySelectorAll('#groupOptions input[type="checkbox"]');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked);
+            const displayText = document.getElementById('groupDisplayText');
+            const total = checkboxes.length;
+            
+            if (checked.length === 0) {
+                displayText.textContent = 'No Groups Selected';
+                displayText.style.color = '#ef4444';
+            } else if (checked.length === total) {
+                displayText.textContent = `All Groups Selected (${total})`;
+                displayText.style.color = '#e2e8f0';
+            } else {
+                displayText.textContent = `${checked.length} of ${total} Groups Selected`;
+                displayText.style.color = '#3b82f6';
             }
+        }
+
+        function searchGroups() {
+            const searchInput = document.getElementById('groupSearch');
+            const filter = searchInput.value.toUpperCase();
+            const options = document.querySelectorAll('.group-option');
+            
+            options.forEach(option => {
+                const label = option.querySelector('label');
+                const text = label.textContent || label.innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    option.classList.remove('hidden');
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        }
+
+        function getSelectedGroups() {
+            const checkboxes = document.querySelectorAll('#groupOptions input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
         }
 
         function populateSelect(id, options) {
@@ -581,7 +673,7 @@
         function getFilteredData() {
             const branch = document.getElementById('branchFilter').value;
             const customerType = document.getElementById('customerTypeFilter').value;
-            const groupDesc = document.getElementById('partyGroupFilter').value;
+            const selectedGroups = getSelectedGroups();
 
             return rawData.filter(row => {
                 // Filter out rows with SUBTOTAL or GRAND TOTAL in Branch
@@ -591,7 +683,12 @@
                 
                 if (branch !== 'All' && row.Branch !== branch) return false;
                 if (customerType !== 'All' && row.Customer_Type !== customerType) return false;
-                if (groupDesc !== 'All' && row.Group_Description !== groupDesc) return false;
+                
+                // Filter by selected groups
+                if (selectedGroups.length > 0 && !selectedGroups.includes(row.Group_Description)) {
+                    return false;
+                }
+                
                 return true;
             });
         }
@@ -650,11 +747,25 @@
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
-            const container = document.querySelector('.multi-select-container');
-            if (container && !container.contains(event.target)) {
+            const monthContainer = document.querySelector('.multi-select-container');
+            const groupContainer = document.getElementById('groupDisplay')?.parentElement;
+            
+            // Close month dropdown
+            if (monthContainer && !monthContainer.contains(event.target)) {
                 const dropdown = document.getElementById('monthDropdown');
                 const display = document.getElementById('monthDisplay');
                 const arrow = document.getElementById('monthArrow');
+                
+                if (dropdown) dropdown.classList.remove('open');
+                if (display) display.classList.remove('open');
+                if (arrow) arrow.classList.remove('open');
+            }
+            
+            // Close group dropdown
+            if (groupContainer && !groupContainer.contains(event.target)) {
+                const dropdown = document.getElementById('groupDropdown');
+                const display = document.getElementById('groupDisplay');
+                const arrow = document.getElementById('groupArrow');
                 
                 if (dropdown) dropdown.classList.remove('open');
                 if (display) display.classList.remove('open');
