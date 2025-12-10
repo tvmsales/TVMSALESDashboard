@@ -4,27 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Group Description Filter</title>
-
-  <!-- Choices.js CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-
-  <!-- Prevent caching -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 40px;
-      background-color: #f9f9f9;
+      background-color: #f0f0f0;
     }
+
     h2 {
       color: #333;
     }
+
     .filter-container {
       max-width: 400px;
       margin-top: 20px;
+    }
+
+    #searchBox {
+      width: 100%;
+      padding: 6px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    #groupFilter {
+      width: 100%;
+      height: 150px;
+      padding: 5px;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -32,64 +39,67 @@
   <h2>Group Description Filter</h2>
 
   <div class="filter-container">
+    <input type="text" id="searchBox" placeholder="Search Groups..." />
     <select id="groupFilter" multiple></select>
   </div>
 
-  <!-- Choices.js JS -->
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
   <script>
-    // List of groups
     const groups = ["Group A", "Group B", "Group C", "Group D", "Group E", "Group F"];
-
-    // Initialize select element
     const select = document.getElementById('groupFilter');
+    const searchBox = document.getElementById('searchBox');
 
-    // Add "Select All" option first
-    const selectAllOption = document.createElement('option');
-    selectAllOption.value = 'all';
-    selectAllOption.text = 'Select All';
-    selectAllOption.selected = true;
-    select.appendChild(selectAllOption);
+    // Populate dropdown
+    function populateOptions(filterText = "") {
+      select.innerHTML = "";
 
-    // Add group options (selected by default)
-    groups.forEach(group => {
-      const option = document.createElement('option');
-      option.value = group;
-      option.text = group;
-      option.selected = true;
-      select.appendChild(option);
-    });
+      // Add Select All option
+      const allOption = document.createElement("option");
+      allOption.value = "all";
+      allOption.text = "Select All";
+      allOption.selected = true;
+      select.appendChild(allOption);
 
-    // Initialize Choices.js
-    const choices = new Choices(select, {
-      removeItemButton: true,
-      searchEnabled: true,
-      placeholder: true,
-      placeholderValue: 'Select groups...',
-      shouldSort: false
-    });
+      // Add group options
+      groups
+        .filter(g => g.toLowerCase().includes(filterText.toLowerCase()))
+        .forEach(group => {
+          const option = document.createElement("option");
+          option.value = group;
+          option.text = group;
+          option.selected = true; // default selected
+          select.appendChild(option);
+        });
+    }
+
+    // Initial populate
+    populateOptions();
 
     // Handle Select All logic
-    select.addEventListener('change', () => {
-      const selectedValues = choices.getValue(true);
+    select.addEventListener("change", function() {
+      const options = Array.from(select.options);
+      const allOption = options.find(opt => opt.value === "all");
 
-      if (selectedValues.includes('all')) {
-        choices.setChoiceByValue(groups.concat('all'));
+      if (allOption.selected) {
+        options.forEach(opt => opt.selected = true);
       } else {
-        const allSelected = groups.every(g => selectedValues.includes(g));
-        if (allSelected && !selectedValues.includes('all')) {
-          choices.setChoiceByValue(groups.concat('all'));
-        } else if (!allSelected && selectedValues.includes('all')) {
-          choices.removeActiveItemsByValue('all');
+        const allSelected = options.filter(opt => opt.value !== "all").every(opt => opt.selected);
+        if (allSelected) {
+          allOption.selected = true;
+        } else {
+          allOption.selected = false;
         }
       }
     });
 
-    // Auto-refresh page every 10 seconds to pick up GitHub updates
+    // Search filter
+    searchBox.addEventListener("input", function() {
+      populateOptions(this.value);
+    });
+
+    // Optional: auto-refresh every 15s for GitHub updates
     setInterval(() => {
       fetch(window.location.href, { cache: "no-store" })
-        .then(response => response.text())
+        .then(res => res.text())
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, "text/html");
@@ -97,7 +107,7 @@
             window.location.reload(true);
           }
         });
-    }, 10000); // check every 10 seconds
+    }, 15000);
   </script>
 </body>
 </html>
