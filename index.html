@@ -292,7 +292,7 @@
 
         .chart-container {
             position: relative;
-            height: 240px;
+            height: 260px;
         }
 
         footer {
@@ -893,6 +893,18 @@
                 if (display) display.classList.remove('open');
                 if (arrow) arrow.classList.remove('open');
             }
+
+            // Check if click is outside party dropdown
+            const partyContainer = document.getElementById('partyDisplay')?.parentElement;
+            if (partyContainer && !partyContainer.contains(event.target)) {
+                const dropdown = document.getElementById('partyDropdown');
+                const display = document.getElementById('partyDisplay');
+                const arrow = document.getElementById('partyArrow');
+                
+                if (dropdown) dropdown.classList.remove('open');
+                if (display) display.classList.remove('open');
+                if (arrow) arrow.classList.remove('open');
+            }
         });
 
         function updateDashboard() {
@@ -1135,14 +1147,17 @@
                     datasets: [{
                         label: 'Revenue',
                         data: sorted.map(([, revenue]) => revenue),
-                        backgroundColor: '#ec4899',
-                        categoryPercentage: 0.7,
-                        barPercentage: 0.8
+                        backgroundColor: '#ec4899'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 20
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -1167,10 +1182,9 @@
                                 maxRotation: 0,
                                 minRotation: 0,
                                 autoSkip: false,
-                                font: { size: 9 }
+                                font: { size: 10 }
                             },
-                            grid: { display: false },
-                            offset: true
+                            grid: { display: false }
                         }
                     }
                 }
@@ -1260,4 +1274,3 @@
     </script>
 </body>
 </html>
-
