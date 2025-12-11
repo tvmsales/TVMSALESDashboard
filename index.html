@@ -441,6 +441,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="filter-group">
+                    <label>Party Name</label>
+                    <div class="multi-select-container">
+                        <div class="multi-select-display" id="partyDisplay" onclick="togglePartyDropdown()">
+                            <span id="partyDisplayText">All Parties Selected</span>
+                            <span class="dropdown-arrow" id="partyArrow">▼</span>
+                        </div>
+                        <div class="multi-select-dropdown" id="partyDropdown">
+                            <div class="multi-select-option select-all">
+                                <input type="checkbox" id="selectAllParties" checked onchange="toggleAllParties()">
+                                <label for="selectAllParties">Select All</label>
+                            </div>
+                            <div style="padding: 5px 10px; border-bottom: 1px solid #334155;">
+                                <input type="text" id="partySearch" placeholder="Search party name..." 
+                                    style="width: 100%; padding: 5px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; font-size: 0.85rem;"
+                                    onkeyup="searchParties()">
+                            </div>
+                            <div id="partyOptions"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="kpi-grid">
@@ -488,6 +509,13 @@
                     <div class="chart-title">Revenue by Customer Type</div>
                     <div class="chart-container">
                         <canvas id="customerTypeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">Customer-Monthwise Revenue</div>
+                    <div class="chart-container">
+                        <canvas id="partyMonthChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -571,9 +599,13 @@
             // Group Description - sorted alphabetically
             const groupDescriptions = [...new Set(rawData.map(d => d.Group_Description).filter(Boolean))].sort();
 
+            // Party Names - sorted alphabetically
+            const partyNames = [...new Set(rawData.map(d => d.Party_name).filter(Boolean))].sort();
+
             populateSelect('branchFilter', branches);
             populateSelect('customerTypeFilter', customerTypes);
             populateGroupFilter(groupDescriptions);
+            populatePartyFilter(partyNames);
         }
 
         function populateGroupFilter(groups) {
@@ -661,6 +693,91 @@
             return Array.from(checkboxes).map(cb => cb.value);
         }
 
+        function populatePartyFilter(parties) {
+            const container = document.getElementById('partyOptions');
+            container.innerHTML = '';
+            
+            parties.forEach(party => {
+                const div = document.createElement('div');
+                div.className = 'multi-select-option party-option';
+                div.innerHTML = `
+                    <input type="checkbox" id="party-${party}" value="${party}" checked onchange="updatePartySelection()">
+                    <label for="party-${party}">${party}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function togglePartyDropdown() {
+            const dropdown = document.getElementById('partyDropdown');
+            const display = document.getElementById('partyDisplay');
+            const arrow = document.getElementById('partyArrow');
+            
+            dropdown.classList.toggle('open');
+            display.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        function toggleAllParties() {
+            const selectAll = document.getElementById('selectAllParties');
+            const checkboxes = document.querySelectorAll('#partyOptions input[type="checkbox"]');
+            
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            
+            updatePartyDisplayText();
+            applyFilters();
+        }
+
+        function updatePartySelection() {
+            const checkboxes = document.querySelectorAll('#partyOptions input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            document.getElementById('selectAllParties').checked = allChecked;
+            updatePartyDisplayText();
+            applyFilters();
+        }
+
+        function updatePartyDisplayText() {
+            const checkboxes = document.querySelectorAll('#partyOptions input[type="checkbox"]');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked);
+            const displayText = document.getElementById('partyDisplayText');
+            const total = checkboxes.length;
+            
+            if (checked.length === 0) {
+                displayText.textContent = 'No Parties Selected';
+                displayText.style.color = '#ef4444';
+            } else if (checked.length === total) {
+                displayText.textContent = `All Parties Selected (${total})`;
+                displayText.style.color = '#e2e8f0';
+            } else {
+                displayText.textContent = `${checked.length} of ${total} Parties Selected`;
+                displayText.style.color = '#3b82f6';
+            }
+        }
+
+        function searchParties() {
+            const searchInput = document.getElementById('partySearch');
+            const filter = searchInput.value.toUpperCase();
+            const options = document.querySelectorAll('.party-option');
+            
+            options.forEach(option => {
+                const label = option.querySelector('label');
+                const text = label.textContent || label.innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    option.classList.remove('hidden');
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        }
+
+        function getSelectedParties() {
+            const checkboxes = document.querySelectorAll('#partyOptions input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
         function populateSelect(id, options) {
             const select = document.getElementById(id);
             select.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
@@ -674,6 +791,7 @@
             const branch = document.getElementById('branchFilter').value;
             const customerType = document.getElementById('customerTypeFilter').value;
             const selectedGroups = getSelectedGroups();
+            const selectedParties = getSelectedParties();
 
             return rawData.filter(row => {
                 // Filter out rows with SUBTOTAL or GRAND TOTAL in Branch
@@ -686,6 +804,11 @@
                 
                 // Filter by selected groups
                 if (selectedGroups.length > 0 && !selectedGroups.includes(row.Group_Description)) {
+                    return false;
+                }
+
+                // Filter by selected parties
+                if (selectedParties.length > 0 && !selectedParties.includes(row.Party_name)) {
                     return false;
                 }
                 
@@ -805,6 +928,7 @@
             updateCustomersChart(data);
             updateBranchChart(data);
             updateCustomerTypeChart(data);
+            updatePartyMonthChart(data);
         }
 
         function updateRevenueChart(data) {
@@ -1047,6 +1171,73 @@
                             },
                             grid: { display: false },
                             offset: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePartyMonthChart(data) {
+            const selectedMonths = getSelectedMonths();
+            const selectedParties = getSelectedParties();
+            
+            // Aggregate revenue by month for selected parties
+            const monthRevenue = {};
+            selectedMonths.forEach(month => {
+                monthRevenue[month] = 0;
+            });
+
+            data.forEach(row => {
+                if (selectedParties.includes(row.Party_name)) {
+                    selectedMonths.forEach(month => {
+                        const val = parseFloat(String(row[month]).replace(/,/g, ''));
+                        monthRevenue[month] += isNaN(val) ? 0 : val;
+                    });
+                }
+            });
+
+            const chartData = selectedMonths.map(month => monthRevenue[month]);
+
+            if (charts.partyMonth) charts.partyMonth.destroy();
+
+            const ctx = document.getElementById('partyMonthChart').getContext('2d');
+            charts.partyMonth = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: selectedMonths,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: chartData,
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => formatCurrency(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 10 },
+                                callback: (value) => '₹' + (value / 100000).toFixed(1) + 'L'
+                            },
+                            grid: { color: '#334155' }
+                        },
+                        x: {
+                            ticks: { 
+                                color: '#94a3b8',
+                                font: { size: 10 }
+                            },
+                            grid: { display: false }
                         }
                     }
                 }
