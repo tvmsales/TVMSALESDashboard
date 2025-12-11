@@ -1151,18 +1151,19 @@
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (context) => formatCurrency(context.parsed.y)
+                                label: (context) => formatCurrency(context.parsed.x)
                             }
                         }
                     },
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true,
                             ticks: {
                                 color: '#94a3b8',
@@ -1171,19 +1172,12 @@
                             },
                             grid: { color: '#334155' }
                         },
-                        x: {
-                            offset: true,
+                        y: {
                             ticks: { 
                                 color: '#94a3b8',
-                                maxRotation: 0,
-                                minRotation: 0,
-                                autoSkip: false,
                                 font: { size: 10 }
                             },
-                            grid: { 
-                                display: false,
-                                offset: true
-                            }
+                            grid: { display: false }
                         }
                     }
                 }
