@@ -292,7 +292,7 @@
 
         .chart-container {
             position: relative;
-            height: 320px;
+            height: 240px;
         }
 
         footer {
@@ -1153,11 +1153,6 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            bottom: 50
-                        }
-                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -1177,14 +1172,18 @@
                             grid: { color: '#334155' }
                         },
                         x: {
+                            offset: true,
                             ticks: { 
                                 color: '#94a3b8',
-                                maxRotation: 45,
-                                minRotation: 45,
+                                maxRotation: 0,
+                                minRotation: 0,
                                 autoSkip: false,
-                                font: { size: 11 }
+                                font: { size: 10 }
                             },
-                            grid: { display: false }
+                            grid: { 
+                                display: false,
+                                offset: true
+                            }
                         }
                     }
                 }
