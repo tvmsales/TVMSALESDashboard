@@ -587,19 +587,13 @@
         }
 
         function populateFilters() {
-            // Filter out Subtotal and Grand Total from branches (no sorting for Branch)
             const branches = ['All', ...new Set(rawData
                 .map(d => d.Branch)
                 .filter(b => b && !b.includes('SUBTOTAL') && !b.includes('GRAND TOTAL'))
             )];
             
-            // No sorting for Customer Type
             const customerTypes = ['All', ...new Set(rawData.map(d => d.Customer_Type).filter(Boolean))];
-            
-            // Group Description - sorted alphabetically
             const groupDescriptions = [...new Set(rawData.map(d => d.Group_Description).filter(Boolean))].sort();
-
-            // Party Names - sorted alphabetically
             const partyNames = [...new Set(rawData.map(d => d.Party_name).filter(Boolean))].sort();
 
             populateSelect('branchFilter', branches);
@@ -794,7 +788,6 @@
             const selectedParties = getSelectedParties();
 
             return rawData.filter(row => {
-                // Filter out rows with SUBTOTAL or GRAND TOTAL in Branch
                 if (row.Branch && (row.Branch.includes('SUBTOTAL') || row.Branch.includes('GRAND TOTAL'))) {
                     return false;
                 }
@@ -802,12 +795,10 @@
                 if (branch !== 'All' && row.Branch !== branch) return false;
                 if (customerType !== 'All' && row.Customer_Type !== customerType) return false;
                 
-                // Filter by selected groups
                 if (selectedGroups.length > 0 && !selectedGroups.includes(row.Group_Description)) {
                     return false;
                 }
 
-                // Filter by selected parties
                 if (selectedParties.length > 0 && !selectedParties.includes(row.Party_name)) {
                     return false;
                 }
@@ -824,4 +815,13 @@
         function toggleMonthDropdown() {
             const dropdown = document.getElementById('monthDropdown');
             const display = document.getElementById('monthDisplay');
-            const arrow = document.getElementById('monthArrow
+            const arrow = document.getElementById('monthArrow');
+            
+            dropdown.classList.toggle('open');
+            display.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        function toggleAllMonths() {
+            const selectAll = document.getElementById('selectAllMonths');
+            const months = ['Apr-25', 'May-25', 'Jun-25', 'Jul-25', 'Aug-25', 'Sep-25',
