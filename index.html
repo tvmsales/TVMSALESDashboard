@@ -382,153 +382,6 @@
             color: #ef4444;
         }
 
-        /* Quarter Comparison Styles */
-        .quarter-comparison-controls {
-            margin-bottom: 20px;
-        }
-
-        .comparison-selectors {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 20px;
-            align-items: end;
-            margin-bottom: 15px;
-        }
-
-        .selector-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .selector-group label {
-            font-size: 0.9rem;
-            color: #cbd5e1;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .quarter-select {
-            padding: 12px 15px;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .quarter-select:hover {
-            border-color: #3b82f6;
-        }
-
-        .quarter-select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .compare-button {
-            padding: 12px 28px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-        }
-
-        .compare-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
-        }
-
-        .compare-button:disabled {
-            background: linear-gradient(135deg, #475569 0%, #334155 100%);
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.6;
-        }
-
-        .comparison-message {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-align: center;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .comparison-message.warning {
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid #fbbf24;
-            color: #fbbf24;
-        }
-
-        .comparison-message.success {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid #10b981;
-            color: #10b981;
-        }
-
-        .comparison-message.info {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid #3b82f6;
-            color: #3b82f6;
-        }
-
-        .comparison-header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .comparison-header h3 {
-            color: #fff;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .insights-box {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(251, 191, 36, 0.1);
-            border-left: 4px solid #fbbf24;
-            border-radius: 8px;
-        }
-
-        .insights-box h4 {
-            margin: 0 0 15px 0;
-        }
-
-        .insight-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            color: #e2e8f0;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
-        }
-
-        .insight-item:last-child {
-            border-bottom: none;
-        }
-
-        .insight-item .icon {
-            font-size: 1.2rem;
-            margin-right: 10px;
-        }
-
         footer {
             text-align: center;
             color: #64748b;
@@ -558,17 +411,6 @@
             font-size: 0.9rem;
             color: #94a3b8;
             font-family: monospace;
-        }
-
-        @media (max-width: 1024px) {
-            .comparison-selectors {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .compare-button {
-                width: 100%;
-            }
         }
 
         @media (max-width: 768px) {
@@ -811,67 +653,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- NEW: QUARTER COMPARISON SECTION -->
-                <div class="chart-card full-width" style="margin-top: 30px;">
-                    <div class="chart-title">🔄 Interactive Quarter Comparison Tool</div>
-                    
-                    <div class="quarter-comparison-controls">
-                        <div class="comparison-selectors">
-                            <div class="selector-group">
-                                <label for="compareQuarter1">Compare From:</label>
-                                <select id="compareQuarter1" class="quarter-select" onchange="validateQuarterSelection()">
-                                    <option value="">Select Quarter</option>
-                                    <option value="Q1">Q1 (Apr-Jun 25)</option>
-                                    <option value="Q2">Q2 (Jul-Sep 25)</option>
-                                    <option value="Q3">Q3 (Oct-Dec 25)</option>
-                                    <option value="Q4">Q4 (Jan-Mar 26)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="selector-group">
-                                <label for="compareQuarter2">Compare With:</label>
-                                <select id="compareQuarter2" class="quarter-select" onchange="validateQuarterSelection()">
-                                    <option value="">Select Quarter</option>
-                                    <option value="Q1">Q1 (Apr-Jun 25)</option>
-                                    <option value="Q2">Q2 (Jul-Sep 25)</option>
-                                    <option value="Q3">Q3 (Oct-Dec 25)</option>
-                                    <option value="Q4">Q4 (Jan-Mar 26)</option>
-                                </select>
-                            </div>
-                            
-                            <button id="compareBtn" class="compare-button" onclick="performQuarterComparison()" disabled>
-                                🔍 COMPARE QUARTERS
-                            </button>
-                        </div>
-                        
-                        <div id="comparisonMessage" class="comparison-message"></div>
-<div id="comparisonResults" style="display: none;">
-                        <div class="comparison-header">
-                            <h3 id="comparisonTitle"></h3>
-                        </div>
-                        
-                        <div class="chart-container tall" style="margin-top: 20px;">
-                            <canvas id="comparisonChart"></canvas>
-                        </div>
-                        
-                        <div style="margin-top: 30px;">
-                            <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">📊 Detailed Comparison Table</h4>
-                            <table class="quarter-table" id="comparisonTable">
-                                <thead>
-                                    <tr id="comparisonTableHeader"></tr>
-                                </thead>
-                                <tbody id="comparisonTableBody"></tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="insights-box">
-                            <h4 style="color: #fbbf24; margin-bottom: 10px;">💡 Key Insights</h4>
-                            <div id="comparisonInsights"></div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
@@ -879,10 +660,6 @@
             <p>Data last updated: <span id="lastUpdate"></span></p>
         </footer>
     </div>
-
-                    </div>
-
-                    <div id="comparison
 
 <script>
         let rawData = [];
@@ -1699,30 +1476,33 @@
         }
 
         function updateQuarterChart(data) {
-            const quarterInfo
-= getQuarterInfo(); const branchQuarters = {};
-
-data.forEach(row => {
-            const branch = row.Branch || 'Unknown';
-            if (!branchQuarters[branch]) {
-                branchQuarters[branch] = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
-            }
+            const quarterInfo = getQuarterInfo();
+            const branchQuarters = {};
             
+            data.forEach(row => {
+                const branch = row.Branch ||
+
+'Unknown'; if (!branchQuarters[branch]) { branchQuarters[branch] = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 }; }
+
+// Q1
             quarterInfo.q1.months.forEach(month => {
                 const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
                 branchQuarters[branch].Q1 += isNaN(val) ? 0 : val;
             });
             
+            // Q2
             quarterInfo.q2.months.forEach(month => {
                 const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
                 branchQuarters[branch].Q2 += isNaN(val) ? 0 : val;
             });
             
+            // Q3
             quarterInfo.q3.months.forEach(month => {
                 const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
                 branchQuarters[branch].Q3 += isNaN(val) ? 0 : val;
             });
             
+            // Q4
             quarterInfo.q4.months.forEach(month => {
                 const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
                 branchQuarters[branch].Q4 += isNaN(val) ? 0 : val;
@@ -1830,6 +1610,7 @@ data.forEach(row => {
         const thead = document.getElementById('quarterTableHeader');
         const tbody = document.getElementById('quarterTableBody');
         
+        // Create table header
         thead.innerHTML = `
             <th style="text-align: left;">Branch</th>
             <th>Q1 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q1.periodLabel}</span></th>
@@ -1880,232 +1661,6 @@ data.forEach(row => {
         });
     }
 
-    // QUARTER COMPARISON FUNCTIONS
-    function validateQuarterSelection() {
-        const q1 = document.getElementById('compareQuarter1').value;
-        const q2 = document.getElementById('compareQuarter2').value;
-        const btn = document.getElementById('compareBtn');
-        const msg = document.getElementById('comparisonMessage');
-
-        if (!q1 || !q2) {
-            btn.disabled = true;
-            msg.className = 'comparison-message info';
-            msg.textContent = 'ℹ️ Please select both quarters to compare';
-            return;
-        }
-
-        if (q1 === q2) {
-            btn.disabled = true;
-            msg.className = 'comparison-message warning';
-            msg.textContent = '⚠️ Cannot compare same quarter within the same financial year. Please select two different quarters.';
-            return;
-        }
-
-        btn.disabled = false;
-        msg.className = 'comparison-message success';
-        msg.textContent = `✅ Ready to compare ${q1} vs ${q2}`;
-    }
-
-    function performQuarterComparison() {
-        const q1 = document.getElementById('compareQuarter1').value;
-        const q2 = document.getElementById('compareQuarter2').value;
-
-        if (!q1 || !q2 || q1 === q2) return;
-
-        const data = getFilteredData();
-        const quarterInfo = getQuarterInfo();
-        
-        const q1Info = quarterInfo[q1.toLowerCase()];
-        const q2Info = quarterInfo[q2.toLowerCase()];
-
-        const branchData = {};
-        
-        data.forEach(row => {
-            const branch = row.Branch || 'Unknown';
-            if (!branchData[branch]) {
-                branchData[branch] = { q1: 0, q2: 0 };
-            }
-            
-            q1Info.months.forEach(month => {
-                const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                branchData[branch].q1 += isNaN(val) ? 0 : val;
-            });
-            
-            q2Info.months.forEach(month => {
-                const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                branchData[branch].q2 += isNaN(val) ? 0 : val;
-            });
-        });
-
-        displayComparisonResults(q1Info.label, q2Info.label, branchData);
-    }
-
-    function displayComparisonResults(q1Label, q2Label, branchData) {
-        document.getElementById('comparisonResults').style.display = 'block';
-        document.getElementById('comparisonTitle').textContent = `Comparing: ${q1Label} vs ${q2Label}`;
-
-        const branches = Object.keys(branchData);
-        const q1Data = branches.map(b => branchData[b].q1 / 100000);
-        const q2Data = branches.map(b => branchData[b].q2 / 100000);
-
-        if (charts.comparison) charts.comparison.destroy();
-
-        const ctx = document.getElementById('comparisonChart').getContext('2d');
-        charts.comparison = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: branches,
-                datasets: [
-                    {
-                        label: q1Label,
-                        data: q1Data,
-                        backgroundColor: '#3b82f6'
-                    },
-                    {
-                        label: q2Label,
-                        data: q2Data,
-                        backgroundColor: '#8b5cf6'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { 
-                            color: '#94a3b8', 
-                            padding: 15, 
-                            font: { size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                const value = context.parsed.y;
-                                return `${context.dataset.label}: ${value.toFixed(1)} L (₹${(value * 100000).toLocaleString('en-IN')})`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Revenue (Lakhs)',
-                            color: '#94a3b8',
-                            font: { size: 12, weight: '600' }
-                        },
-                        ticks: {
-                            color: '#94a3b8',
-                            callback: (value) => value.toFixed(0) + ' L'
-                        },
-                        grid: { color: '#334155' }
-                    },
-                    x: {
-                        ticks: { 
-                            color: '#94a3b8', 
-                            font: { size: 11, weight: '600' }
-                        },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-
-        // Update table
-        const thead = document.getElementById('comparisonTableHeader');
-        const tbody = document.getElementById('comparisonTableBody');
-
-        thead.innerHTML = `
-            <th style="text-align: left;">Branch</th>
-            <th>${q1Label} (Lakhs)</th>
-            <th>${q2Label} (Lakhs)</th>
-            <th>Change (Lakhs)</th>
-            <th>Growth %</th>
-        `;
-
-        tbody.innerHTML = '';
-        let totalQ1 = 0, totalQ2 = 0;
-        let bestGrowth = { branch: '', growth: -Infinity };
-        let worstGrowth = { branch: '', growth: Infinity };
-
-        branches.forEach(branch => {
-            const q1Val = branchData[branch].q1 / 100000;
-            const q2Val = branchData[branch].q2 / 100000;
-            const change = q2Val - q1Val;
-            const growth = q1Val > 0 ? ((change / q1Val) * 100) : 0;
-
-            totalQ1 += q1Val;
-            totalQ2 += q2Val;
-
-            if (growth > bestGrowth.growth) {
-                bestGrowth = { branch, growth };
-            }
-            if (growth < worstGrowth.growth) {
-                worstGrowth = { branch, growth };
-            }
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${branch}</td>
-                <td><strong>${q1Val.toFixed(1)}</strong></td>
-                <td><strong>${q2Val.toFixed(1)}</strong></td>
-                <td><strong>${change >= 0 ? '+' : ''}${change.toFixed(1)}</strong></td>
-                <td>
-                    <span class="growth-badge ${growth >= 0 ? 'growth-positive' : 'growth-negative'}">
-                        ${growth > 0 ? '▲' : '▼'} ${Math.abs(growth).toFixed(1)}%
-                    </span>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        // Total row
-        const totalChange = totalQ2 - totalQ1;
-        const totalGrowth = totalQ1 > 0 ? ((totalChange / totalQ1) * 100) : 0;
-        const totalRow = document.createElement('tr');
-        totalRow.style.fontWeight = 'bold';
-        totalRow.style.borderTop = '2px solid #3b82f6';
-        totalRow.innerHTML = `
-            <td>TOTAL</td>
-            <td><strong>${totalQ1.toFixed(1)}</strong></td>
-            <td><strong>${totalQ2.toFixed(1)}</strong></td>
-            <td><strong>${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)}</strong></td>
-            <td>
-                <span class="growth-badge ${totalGrowth >= 0 ? 'growth-positive' : 'growth-negative'}">
-                    ${totalGrowth > 0 ? '▲' : '▼'} ${Math.abs(totalGrowth).toFixed(1)}%
-                </span>
-            </td>
-        `;
-        tbody.appendChild(totalRow);
-
-        // Update insights
-        const insights = document.getElementById('comparisonInsights');
-        insights.innerHTML = `
-            <div class="insight-item">
-                <span class="icon">📈</span>
-                <span><strong>Overall Growth:</strong> ${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(1)}% (${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)} Lakhs)</span>
-            </div>
-            <div class="insight-item">
-                <span class="icon">🏆</span>
-                <span><strong>Best Performer:</strong> ${bestGrowth.branch} (${bestGrowth.growth > 0 ? '+' : ''}${bestGrowth.growth.toFixed(1)}% growth)</span>
-            </div>
-            <div class="insight-item">
-                <span class="icon">⚠️</span>
-                <span><strong>Needs Attention:</strong> ${worstGrowth.branch} (${worstGrowth.growth > 0 ? '+' : ''}${worstGrowth.growth.toFixed(1)}% growth)</span>
-            </div>
-            <div class="insight-item">
-                <span class="icon">💰</span>
-                <span><strong>Total Revenue Change:</strong> ${q1Label}: ₹${(totalQ1 * 100000).toLocaleString('en-IN')} → ${q2Label}: ₹${(totalQ2 * 100000).toLocaleString('en-IN')}</span>
-            </div>
-        `;
-
-        // Scroll to results
-        document.getElementById('comparisonResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
     function formatCurrency(value) {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -2117,6 +1672,6 @@ data.forEach(row => {
     function formatNumber(value) {
         return new Intl.NumberFormat('en-IN').format(value);
     }
-
     window.addEventListener('load', loadData);
 </script>
+
