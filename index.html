@@ -494,6 +494,46 @@
                         </div>
                     </div>
                 </div>
+<!-- Frequency -->
+<div class="filter-group">
+  <label>Frequency</label>
+  <select id="frequencyFilter" onchange="onFrequencyChange()">
+    <option value="">Select Frequency</option>
+    <option value="Yearly">Yearly</option>
+    <option value="Half-Yearly">Half-Yearly</option>
+    <option value="Quarterly">Quarterly</option>
+  </select>
+</div>
+
+<!-- Frequency Multi Select -->
+<div class="filter-group" id="frequencyMultiGroup" style="display:none;">
+  <label id="frequencyLabel"></label>
+
+  <div class="multi-select-container">
+    <div class="multi-select-display" onclick="toggleFrequencyDropdown()">
+      <span id="frequencyDisplayText">Select</span>
+      <span class="dropdown-arrow" id="frequencyArrow">▼</span>
+    </div>
+
+    <div class="multi-select-dropdown" id="frequencyDropdown">
+      <div class="multi-select-option select-all">
+        <input type="checkbox" id="selectAllFrequency" checked onchange="toggleAllFrequency()">
+        <label>Select All</label>
+      </div>
+
+      <div style="padding:6px;border-bottom:1px solid #334155">
+        <input type="text" placeholder="Search..."
+          onkeyup="searchFrequency(this.value)"
+          style="width:100%;padding:6px;background:#0f172a;border:1px solid #334155;color:#e2e8f0">
+      </div>
+
+      <div id="frequencyOptions"></div>
+    </div>
+  </div>
+</div>
+
+		
+			
                 <div class="filter-group">
                     <label>Select Months</label>
                     <div class="multi-select-container">
@@ -674,6 +714,22 @@
         let availableMonths = [];
 
         const ALL_MONTHS = ['Apr-25', 'May-25', 'Jun-25', 'Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25', 'Dec-25', 'Jan-26', 'Feb-26', 'Mar-26'];
+	const FREQUENCY_PERIODS = {
+  "Yearly": {
+    "FY 2025-26": ['Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26']
+  },
+  "Half-Yearly": {
+    "H1 (Apr-Sep)": ['Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25'],
+    "H2 (Oct-Mar)": ['Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26']
+  },
+  "Quarterly": {
+    "Q1 (Apr-Jun)": ['Apr-25','May-25','Jun-25'],
+    "Q2 (Jul-Sep)": ['Jul-25','Aug-25','Sep-25'],
+    "Q3 (Oct-Dec)": ['Oct-25','Nov-25','Dec-25'],
+    "Q4 (Jan-Mar)": ['Jan-26','Feb-26','Mar-26']
+  }
+};
+
 
         async function loadData() {
             const csvFileName = 'SALESMIS.csv';
@@ -782,6 +838,8 @@
             
             populateFilters();
             updateDashboard();
+            onFrequencyChange();
+
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-IN');
         }
 
@@ -815,6 +873,54 @@
                 container.appendChild(div);
             });
         }
+
+function onFrequencyChange() {
+  const freq = document.getElementById('frequencyFilter').value;
+  const group = document.getElementById('frequencyMultiGroup');
+  const optionsDiv = document.getElementById('frequencyOptions');
+
+  // ✅ CLOSE dependent dropdown immediately
+  closeFrequencyDropdown();
+
+  if (!freq) {
+    group.style.display = 'none';
+    return;
+  }
+
+  group.style.display = 'block';
+  document.getElementById('frequencyLabel').innerText = `Select ${freq}`;
+  optionsDiv.innerHTML = '';
+
+  Object.keys(FREQUENCY_PERIODS[freq]).forEach(p => {
+    optionsDiv.innerHTML += `
+      <div class="multi-select-option freq-option">
+        <input type="checkbox" value="${p}" checked onchange="onFrequencyOptionChange()">
+        <label>${p}</label>
+      </div>
+    `;
+  });
+
+  updateFrequencyDisplay();
+  applyFilters();
+}
+
+
+function onFrequencyOptionChange() {
+  updateFrequencySelection();
+  closeFrequencyDropdown(); // ✅ auto close after selection
+}
+
+
+function closeFrequencyDropdown() {
+  const dropdown = document.getElementById('frequencyDropdown');
+  const arrow = document.getElementById('frequencyArrow');
+
+  if (dropdown) dropdown.classList.remove('open');
+  if (arrow) arrow.classList.remove('open');
+}
+
+
+
 
         function toggleGroupDropdown() {
             const dropdown = document.getElementById('groupDropdown');
@@ -923,6 +1029,51 @@
             applyFilters();
         }
 
+
+function toggleFrequencyDropdown() {
+  const dropdown = document.getElementById('frequencyDropdown');
+  const arrow = document.getElementById('frequencyArrow');
+
+  dropdown.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+
+function toggleAllFrequency() {
+  document.querySelectorAll('.freq-option input')
+    .forEach(cb => cb.checked = selectAllFrequency.checked);
+  updateFrequencyDisplay();
+  applyFilters();
+}
+
+function updateFrequencySelection() {
+  const all = [...document.querySelectorAll('.freq-option input')]
+    .every(cb => cb.checked);
+  selectAllFrequency.checked = all;
+  updateFrequencyDisplay();
+  applyFilters();
+}
+
+function updateFrequencyDisplay() {
+  const checked = document.querySelectorAll('.freq-option input:checked');
+  const total = document.querySelectorAll('.freq-option input').length;
+
+  if (checked.length === 0)
+    frequencyDisplayText.innerText = 'None Selected';
+  else if (checked.length === total)
+    frequencyDisplayText.innerText = `All Selected (${total})`;
+  else
+    frequencyDisplayText.innerText = `${checked.length} Selected`;
+}
+
+function searchFrequency(val) {
+  document.querySelectorAll('.freq-option').forEach(opt => {
+    opt.style.display = opt.innerText.toLowerCase().includes(val.toLowerCase())
+      ? 'flex' : 'none';
+  });
+}
+
+
         function updatePartySelection() {
             const checkboxes = document.querySelectorAll('#partyOptions input[type="checkbox"]');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
@@ -1007,11 +1158,20 @@
         }
 
         function getSelectedMonths() {
-            return ALL_MONTHS.filter(month => {
-                const checkbox = document.getElementById(`month-${month}`);
-                return checkbox && checkbox.checked;
-            });
-        }
+  const freq = frequencyFilter.value;
+  if (!freq) return ALL_MONTHS;
+
+  const selectedPeriods = [...document.querySelectorAll('.freq-option input:checked')]
+    .map(cb => cb.value);
+
+  let months = [];
+  selectedPeriods.forEach(p => {
+    months = months.concat(FREQUENCY_PERIODS[freq][p]);
+  });
+
+  return [...new Set(months)];
+}
+
 
         function toggleMonthDropdown() {
             const dropdown = document.getElementById('monthDropdown');
@@ -1095,6 +1255,17 @@
                 if (display) display.classList.remove('open');
                 if (arrow) arrow.classList.remove('open');
             }
+
+
+	// ✅ Close Frequency dropdown on outside click
+const freqContainer = document
+  .getElementById('frequencyMultiGroup')
+  ?.querySelector('.multi-select-container');
+
+if (freqContainer && !freqContainer.contains(event.target)) {
+  closeFrequencyDropdown();
+}
+
         });
 
         function updateDashboard() {
@@ -1566,149 +1737,104 @@
             });
         }
 
-        function updateQuarterChart(data) {
-            const quarterInfo = getQuarterInfo();
-            const branchQuarters = {};
-            
-            data.forEach(row => {
-                const branch = row.Branch || 'Unknown';
-                if (!branchQuarters[branch]) {
-                    branchQuarters[branch] = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
-                }
+function getSelectedQuarters() {
+  const freq = document.getElementById('frequencyFilter').value;
 
-                quarterInfo.q1.months.forEach(month => {
-                    const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                    branchQuarters[branch].Q1 += isNaN(val) ? 0 : val;
-                });
-                
-                quarterInfo.q2.months.forEach(month => {
-                    const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                    branchQuarters[branch].Q2 += isNaN(val) ? 0 : val;
-                });
-                
-                quarterInfo.q3.months.forEach(month => {
-                    const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                    branchQuarters[branch].Q3 += isNaN(val) ? 0 : val;
-                });
-                
-                quarterInfo.q4.months.forEach(month => {
-                    const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                    branchQuarters[branch].Q4 += isNaN(val) ? 0 : val;
-                });
-            });
+  if (freq !== 'Quarterly') {
+    return ['Q1', 'Q2', 'Q3', 'Q4']; // default behavior
+  }
 
-            const chartData = Object.entries(branchQuarters).map(([branch, quarters]) => ({
-                branch,
-                [quarterInfo.q1.label]: quarters.Q1 / 100000,
-                [quarterInfo.q2.label]: quarters.Q2 / 100000,
-                [quarterInfo.q3.label]: quarters.Q3 / 100000,
-                [quarterInfo.q4.label]: quarters.Q4 / 100000
-            }));
+  return [...document.querySelectorAll('.freq-option input:checked')]
+    .map(cb => cb.value.split(' ')[0]); // "Q1 (Apr-Jun)" → Q1
+}
 
-            if (charts.quarter) charts.quarter.destroy();
 
-            const ctx = document.getElementById('quarterChart').getContext('2d');
-            charts.quarter = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.map(d => d.branch),
-                    datasets: [
-                        {
-                            label: quarterInfo.q1.label,
-                            data: chartData.map(d => d[quarterInfo.q1.label]),
-                            backgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: quarterInfo.q2.label,
-                            data: chartData.map(d => d[quarterInfo.q2.label]),
-                            backgroundColor: '#8b5cf6'
-                        },
-                        {
-                            label: quarterInfo.q3.label,
-                            data: chartData.map(d => d[quarterInfo.q3.label]),
-                            backgroundColor: '#ec4899'
-                        },
-                        {
-                            label: quarterInfo.q4.label,
-                            data: chartData.map(d => d[quarterInfo.q4.label]),
-                            backgroundColor: '#f59e0b'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { 
-                                color: '#94a3b8', 
-                                padding: 15, 
-                                font: { size: 12 },
-                                usePointStyle: true,
-                                pointStyle: 'rect'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    const value = context.parsed.y;
-                                    return `${context.dataset.label}: ${value.toFixed(1)} L (₹${(value * 100000).toLocaleString('en-IN')})`;
-                                }
-                            },
-                            backgroundColor: '#1e293b',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1',
-                            borderColor: '#3b82f6',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: true
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Revenue (Lakhs)',
-                                color: '#94a3b8',
-                                font: { size: 12, weight: '600' }
-                            },
-                            ticks: {
-                                color: '#94a3b8',
-                                font: { size: 11 },
-                                callback: (value) => value.toFixed(0) + ' L'
-                            },
-                            grid: { color: '#334155' }
-                        },
-                        x: {
-                            ticks: { 
-                                color: '#94a3b8', 
-                                font: { size: 11, weight: '600' }
-                            },
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
 
-            updateQuarterTable(branchQuarters, quarterInfo);
+ function updateQuarterChart(data) {
+  const quarterInfo = getQuarterInfo();
+  const selectedQuarters = getSelectedQuarters();
+  const branchQuarters = {};
+
+  data.forEach(row => {
+    const branch = row.Branch || 'Unknown';
+    if (!branchQuarters[branch]) {
+      branchQuarters[branch] = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+    }
+
+    if (selectedQuarters.includes('Q1')) {
+      quarterInfo.q1.months.forEach(m => {
+        branchQuarters[branch].Q1 += parseFloat(String(row[m] || 0).replace(/,/g, '')) || 0;
+      });
+    }
+
+    if (selectedQuarters.includes('Q2')) {
+      quarterInfo.q2.months.forEach(m => {
+        branchQuarters[branch].Q2 += parseFloat(String(row[m] || 0).replace(/,/g, '')) || 0;
+      });
+    }
+
+    if (selectedQuarters.includes('Q3')) {
+      quarterInfo.q3.months.forEach(m => {
+        branchQuarters[branch].Q3 += parseFloat(String(row[m] || 0).replace(/,/g, '')) || 0;
+      });
+    }
+
+    if (selectedQuarters.includes('Q4')) {
+      quarterInfo.q4.months.forEach(m => {
+        branchQuarters[branch].Q4 += parseFloat(String(row[m] || 0).replace(/,/g, '')) || 0;
+      });
+    }
+  });
+
+  const datasets = [];
+  const colors = { Q1:'#3b82f6', Q2:'#8b5cf6', Q3:'#ec4899', Q4:'#f59e0b' };
+
+  selectedQuarters.forEach(q => {
+    datasets.push({
+      label: quarterInfo[q.toLowerCase()].label,
+      data: Object.values(branchQuarters).map(v => (v[q] / 100000)),
+      backgroundColor: colors[q]
+    });
+  });
+
+  if (charts.quarter) charts.quarter.destroy();
+
+  charts.quarter = new Chart(document.getElementById('quarterChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(branchQuarters),
+      datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: v => v + ' L' }
         }
+      }
+    }
+  });
 
-        function updateQuarterTable(branchQuarters, quarterInfo) {
+  updateQuarterTable(branchQuarters, quarterInfo, selectedQuarters);
+}
+
+     function updateQuarterTable(branchQuarters, quarterInfo) {
             const thead = document.getElementById('quarterTableHeader');
             const tbody = document.getElementById('quarterTableBody');
-            
+
             thead.innerHTML = `
-                <th style="text-align: left;">Branch</th>
-                <th>Q1 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q1.periodLabel}</span></th>
-                <th>Q2 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q2.periodLabel}</span></th>
-                <th class="q3-col">Q3 (Lakhs) ${quarterInfo.q3.isPartial ? '⚠️' : ''}<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q3.periodLabel}</span></th>
-                <th class="q4-col">Q4 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q4.periodLabel}</span></th>
-                <th>Q1→Q2 Growth</th>
-                <th class="q3-col">Q2→Q3 Growth</th>
-                <th class="q4-col">Q3→Q4 Growth</th>
+<th style="text-align: left;">Branch</th>
+<th>Q1 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q1.periodLabel}</span></th>
+<th>Q2 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q2.periodLabel}</span></th>
+<th class="q3-col">Q3 (Lakhs) ${quarterInfo.q3.isPartial ? '⚠️' : ''}<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q3.periodLabel}</span></th>
+<th class="q4-col">Q4 (Lakhs)<br><span style="font-size: 0.75rem; font-weight: 400; opacity: 0.8;">${quarterInfo.q4.periodLabel}</span></th>
+<th>Q1→Q2 Growth</th>
+<th class="q3-col">Q2→Q3 Growth</th>
+<th class="q4-col">Q3→Q4 Growth</th>
             `;
-            
+
             tbody.innerHTML = '';
 
             Object.entries(branchQuarters).forEach(([branch, quarters]) => {
@@ -1716,33 +1842,33 @@
                 const q2 = quarters.Q2 / 100000;
                 const q3 = quarters.Q3 / 100000;
                 const q4 = quarters.Q4 / 100000;
-                
+
                 const q1ToQ2Growth = q1 > 0 ? ((q2 - q1) / q1 * 100) : 0;
                 const q2ToQ3Growth = q2 > 0 ? ((q3 - q2) / q2 * 100) : 0;
                 const q3ToQ4Growth = q3 > 0 ? ((q4 - q3) / q3 * 100) : 0;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${branch}</td>
-                    <td><strong>${q1.toFixed(1)}</strong></td>
-                    <td><strong>${q2.toFixed(1)}</strong></td>
-                    <td class="q3-col"><strong>${q3.toFixed(1)}</strong></td>
-                    <td class="q4-col"><strong>${q4.toFixed(1)}</strong></td>
-                    <td>
-                        <span class="growth-badge ${q1ToQ2Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
+<td>${branch}</td>
+<td><strong>${q1.toFixed(1)}</strong></td>
+<td><strong>${q2.toFixed(1)}</strong></td>
+<td class="q3-col"><strong>${q3.toFixed(1)}</strong></td>
+<td class="q4-col"><strong>${q4.toFixed(1)}</strong></td>
+<td>
+<span class="growth-badge ${q1ToQ2Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
                             ${q1ToQ2Growth > 0 ? '▲' : '▼'} ${Math.abs(q1ToQ2Growth).toFixed(1)}%
-                        </span>
-                    </td>
-                    <td class="q3-col">
-                        <span class="growth-badge ${q2ToQ3Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
+</span>
+</td>
+<td class="q3-col">
+<span class="growth-badge ${q2ToQ3Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
                             ${q2ToQ3Growth > 0 ? '▲' : '▼'} ${Math.abs(q2ToQ3Growth).toFixed(1)}%
-                        </span>
-                    </td>
-                    <td class="q4-col">
-                        <span class="growth-badge ${q3ToQ4Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
+</span>
+</td>
+<td class="q4-col">
+<span class="growth-badge ${q3ToQ4Growth >= 0 ? 'growth-positive' : 'growth-negative'}">
                             ${q3ToQ4Growth > 0 ? '▲' : '▼'} ${Math.abs(q3ToQ4Growth).toFixed(1)}%
-                        </span>
-                    </td>
+</span>
+</td>
                 `;
                 tbody.appendChild(row);
             });
