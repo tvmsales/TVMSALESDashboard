@@ -1304,23 +1304,22 @@ if (freqContainer && !freqContainer.contains(event.target)) {
             updateTopGroupsChart(data);
             updateQuarterChart(data);
         }
+function updateRevenueChart(data) {
+const selectedMonths = getSelectedMonths();
+const validMonths = selectedMonths.filter(month => availableMonths.includes(month));
+const revenues = validMonths.map(month => {
+return data.reduce((sum, row) => {
+const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
+return sum + (isNaN(val) ? 0 : val);
+}, 0);
+});
+if (charts.revenue) charts.revenue.destroy();
+const ctx = document.getElementById('revenueChart').getContext('2d');
+charts.revenue = new Chart(ctx, {
+type: 'line',
+data: {
+labels: validMonths,
 
-        function updateRevenueChart(data) {
-            const selectedMonths = getSelectedMonths();
-            const revenues = selectedMonths.map(month => {
-                return data.reduce((sum, row) => {
-                    const val = parseFloat(String(row[month] || '0').replace(/,/g, ''));
-                    return sum + (isNaN(val) ? 0 : val);
-                }, 0);
-            });
-
-            if (charts.revenue) charts.revenue.destroy();
-
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            charts.revenue = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: selectedMonths,
                     datasets: [{
                         label: 'Revenue',
                         data: revenues,
@@ -1891,3 +1890,4 @@ function getSelectedQuarters() {
 
 </body>
 </html>
+
